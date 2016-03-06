@@ -199,6 +199,15 @@ Yarn
     # ./conf/zeppelin-env.sh
     export SPARK_HOME=/path/to/spark_dir
 
+Yarn Cluster
+
+- Install Livy server in the cluster master node from : https://github.com/cloudera/hue/tree/master/apps/spark/java
+- Start Livy server in  **yarn mode**, refer to Livy documentation. 
+- You need to white list spark configuration in Livy in order to be able to send custom spark configuration. Copy the file `spark-user-configurable-options.template` in the conf dir of Livy to  `spark-user-configurable-options.conf`
+- Zeppelin note  conf:
+   - set master  to yarn-cluster
+   - set livy.server.host to <cluster-master-node>:8998
+
 ### Run
     ./bin/zeppelin-daemon.sh start
 
