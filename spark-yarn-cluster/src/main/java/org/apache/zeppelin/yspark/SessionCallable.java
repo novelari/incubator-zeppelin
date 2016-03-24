@@ -17,6 +17,9 @@ public class SessionCallable implements Callable<Session> {
   @Override
   public Session call() throws Exception {
     while (!this.session.state.equals("idle")) {
+      if (this.session.state.equals("error")){
+        return this.session;
+      }
       this.session = SessionFactory.getSession(this.session);
       TimeUnit.MILLISECONDS.sleep(2000);
     }

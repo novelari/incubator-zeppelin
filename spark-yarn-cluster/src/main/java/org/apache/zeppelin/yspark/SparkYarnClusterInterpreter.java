@@ -81,7 +81,7 @@ public class SparkYarnClusterInterpreter extends Interpreter {
                     getSystemDefault(null, "spark.executor.memory", "512m"),
                     "Executor memory per worker instance. ex) 512m, 32g")
                 .add("spark.dynamicAllocation.enabled",
-                    getSystemDefault(null, "spark.dynamicAllocation.enabled", "true"),
+                    getSystemDefault(null, "spark.dynamicAllocation.enabled", "false"),
                     "Use dynamic resource allocation")
                 .add(
                     "spark.dynamicAllocation.cachedExecutorIdleTimeout",
@@ -90,6 +90,9 @@ public class SparkYarnClusterInterpreter extends Interpreter {
                 .add("spark.dynamicAllocation.minExecutors",
                     getSystemDefault(null, "spark.dynamicAllocation.minExecutors", "0"),
                     "Lower bound for the number of executors if dynamic allocation is enabled. ")
+                .add("spark.dynamicAllocation.initialExecutors",
+                    getSystemDefault(null, "spark.dynamicAllocation.initialExecutors", "1"),
+                    "Initial number of executors to run if dynamic allocation is enabled. ")
                 .add("spark.dynamicAllocation.maxExecutors",
                     getSystemDefault(null, "spark.dynamicAllocation.maxExecutors", "10"),
                     "Upper bound for the number of executors if dynamic allocation is enabled. ")
@@ -157,8 +160,17 @@ public class SparkYarnClusterInterpreter extends Interpreter {
     if (session == null) {
       try {
         session = SessionFactory.createSession(host, getProperty());
+
         if (session == null) {
           return new InterpreterResult(Code.ERROR, "Can not create a session, please try again.");
+        }
+
+        if (session.state.equals("error")) {
+          SessionFactory.deleteSession(session);
+
+          return new InterpreterResult(Code.ERROR,
+              "Resources aren't enough or error happened while creating session,"
+              + " please try again.");
         }
 
       } catch (IOException e) {

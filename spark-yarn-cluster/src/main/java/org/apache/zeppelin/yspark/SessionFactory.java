@@ -48,6 +48,8 @@ public class SessionFactory {
           property.getProperty("spark.dynamicAllocation.cachedExecutorIdleTimeout"));
       conf.put("spark.dynamicAllocation.minExecutors",
           property.getProperty("spark.dynamicAllocation.minExecutors"));
+      conf.put("spark.dynamicAllocation.initialExecutors",
+          property.getProperty("spark.dynamicAllocation.initialExecutors"));
       conf.put("spark.dynamicAllocation.maxExecutors",
           property.getProperty("spark.dynamicAllocation.maxExecutors"));
     }
