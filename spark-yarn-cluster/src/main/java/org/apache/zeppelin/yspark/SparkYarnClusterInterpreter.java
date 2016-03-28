@@ -18,14 +18,10 @@
 package org.apache.zeppelin.yspark;
 
 import static org.apache.zeppelin.yspark.Http.get;
-import static org.apache.zeppelin.yspark.Http.post;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 
 import org.apache.zeppelin.interpreter.Interpreter;
 import org.apache.zeppelin.interpreter.InterpreterContext;
@@ -35,7 +31,6 @@ import org.apache.zeppelin.interpreter.InterpreterResult.Code;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
 import com.ning.http.client.Response;
 
 /**
@@ -123,18 +118,20 @@ public class SparkYarnClusterInterpreter extends Interpreter {
 
   @Override
   public void close() {
-    if (session != null)
+    if (session != null) {
       SessionFactory.deleteSession(session);
+    }
   }
 
   private boolean checkLivyServer() {
     try {
       Response r = get(host);
-      if (r.hasResponseStatus())
+      if (r.hasResponseStatus()) {
         return true;
+      }
       return false;
     } catch (Exception e) {
-      e.printStackTrace();
+     
       return false;
     }
   }
@@ -152,7 +149,6 @@ public class SparkYarnClusterInterpreter extends Interpreter {
       try {
         session = SessionFactory.getSession(session);
       } catch (IOException e) {
-        e.printStackTrace();
         return new InterpreterResult(Code.ERROR,
             "Livy server isn't running on this host, please check that host.");
       }
@@ -174,7 +170,6 @@ public class SparkYarnClusterInterpreter extends Interpreter {
         }
 
       } catch (IOException e) {
-        e.printStackTrace();
         return new InterpreterResult(Code.ERROR,
             "Livy server isn't running on this host, please check that host.");
       }

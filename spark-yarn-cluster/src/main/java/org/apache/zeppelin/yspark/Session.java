@@ -1,5 +1,8 @@
 package org.apache.zeppelin.yspark;
 
+import static org.apache.zeppelin.yspark.Http.get;
+import static org.apache.zeppelin.yspark.Http.post;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
@@ -9,10 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.ning.http.client.*;
-
-import static org.apache.zeppelin.yspark.Http.*;
+import com.ning.http.client.Response;
 /**
  * some comments
  *

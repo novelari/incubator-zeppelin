@@ -1,11 +1,5 @@
 package org.apache.zeppelin.yspark;
 
-import static org.apache.zeppelin.yspark.Http.*;
-
-import java.io.IOException;
-
-import com.google.gson.Gson;
-import com.ning.http.client.Response;
 /**
  * some comments
  *

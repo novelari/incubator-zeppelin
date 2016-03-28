@@ -1,5 +1,9 @@
 package org.apache.zeppelin.yspark;
 
+import static org.apache.zeppelin.yspark.Http.delete;
+import static org.apache.zeppelin.yspark.Http.get;
+import static org.apache.zeppelin.yspark.Http.post;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
@@ -11,10 +15,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.ning.http.client.*;
-
-import static org.apache.zeppelin.yspark.Http.*;
+import com.ning.http.client.Response;
 
 /**
  * some comments
@@ -37,8 +38,9 @@ public class SessionFactory {
     conf.put("spark.driver.memory", property.getProperty("spark.driver.memory"));
     conf.put("spark.executor.memory", property.getProperty("spark.executor.memory"));
 
-    if (!property.getProperty("spark.dynamicAllocation.enabled").equals("true"))
+    if (!property.getProperty("spark.dynamicAllocation.enabled").equals("true")) {
       conf.put("spark.executor.instances", property.getProperty("spark.executor.instances"));
+    }
 
     if (property.getProperty("spark.dynamicAllocation.enabled").equals("true")) {
       conf.put("spark.dynamicAllocation.enabled",
@@ -97,8 +99,9 @@ public class SessionFactory {
   public static Session getSession(Session session) throws IOException {
     String url = session.url;
     Response r = get(url);
-    if (r.getStatusCode() == 404)
+    if (r.getStatusCode() == 404) {
       return null;
+    }
     String json = r.getResponseBody();
     Gson gson = new Gson();
     session = gson.fromJson(json, Session.class);
