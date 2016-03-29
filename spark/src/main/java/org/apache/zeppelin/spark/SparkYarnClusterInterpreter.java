@@ -160,6 +160,7 @@ public class SparkYarnClusterInterpreter extends Interpreter {
       try {
         session = SessionFactory.getSession(session);
       } catch (IOException e) {
+        logger.info("Interpreter exception", e);
         return new InterpreterResult(Code.ERROR,
             "Livy server isn't running on this host, please check that host.");
       }
@@ -181,6 +182,7 @@ public class SparkYarnClusterInterpreter extends Interpreter {
         }
 
       } catch (IOException e) {
+        logger.info("Interpreter exception", e);
         return new InterpreterResult(Code.ERROR,
             "Livy server isn't running on this host, please check that host.");
       }
@@ -189,7 +191,7 @@ public class SparkYarnClusterInterpreter extends Interpreter {
     try {
       statement = session.createStatement(st);
     } catch (IOException e) {
-      e.printStackTrace();
+      logger.info("Interpreter exception", e);
       return new InterpreterResult(Code.ERROR, "Can not create a statement, please try again.");
 
     }

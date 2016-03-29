@@ -16,7 +16,7 @@ import com.google.gson.Gson;
 import com.ning.http.client.Response;
 
 /**
- * some comments
+ * 
  *
  */
 public class SessionFactory {
@@ -62,12 +62,14 @@ public class SessionFactory {
     String json = r.getResponseBody();
     Session session = gson.fromJson(json, Session.class);
     session.url = host + "/sessions/" + session.id;
+    
     Callable callableTask = new SessionCallable(session);
     ExecutorService executor = Executors.newFixedThreadPool(2);
-
     Future<Session> future = executor.submit(callableTask);
-    int maxWaitTime = 120000;
+    
+    int maxWaitTime = 180000;
     int curentWaitTime = 0;
+    
     while (!future.isDone()) {
       try {
         TimeUnit.MILLISECONDS.sleep(2000);

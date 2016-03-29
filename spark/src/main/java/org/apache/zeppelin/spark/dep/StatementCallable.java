@@ -3,7 +3,7 @@ package org.apache.zeppelin.spark.dep;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 /**
- * some comments
+ * 
  *
  */
 public class StatementCallable implements Callable<Statement> {

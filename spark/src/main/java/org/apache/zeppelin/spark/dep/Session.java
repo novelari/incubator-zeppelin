@@ -12,7 +12,7 @@ import java.util.concurrent.Future;
 import com.google.gson.Gson;
 import com.ning.http.client.Response;
 /**
- * some comments
+ * 
  *
  */
 public class Session {

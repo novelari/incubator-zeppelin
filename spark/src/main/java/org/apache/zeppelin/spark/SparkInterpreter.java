@@ -98,6 +98,34 @@ public class SparkInterpreter extends Interpreter {
             .add("spark.cores.max",
                 getSystemDefault(null, "spark.cores.max", ""),
                 "Total number of cores to use. Empty value uses all available core.")
+            .add("livy.server.host",
+                getSystemDefault(null, "livy.server.host", "localhost:8998"),
+                "The host of livy server.")
+            .add("spark.driver.cores", getSystemDefault(null, "spark.driver.cores", "1"),
+                "Driver cores. ex) 1, 2")
+            .add("spark.driver.memory", getSystemDefault(null, "spark.driver.memory", "512m"),
+                "Driver memory. ex) 512m, 32g")
+            .add("spark.executor.instances",
+                getSystemDefault(null, "spark.executor.instances", "3"),
+                "Executor instances. ex) 1, 4")
+            .add("spark.executor.cores", getSystemDefault(null, "spark.executor.cores", "1"),
+                "Num cores per executor. ex) 1, 4")
+            .add("spark.dynamicAllocation.enabled",
+                getSystemDefault(null, "spark.dynamicAllocation.enabled", "false"),
+                "Use dynamic resource allocation")
+            .add(
+                "spark.dynamicAllocation.cachedExecutorIdleTimeout",
+                getSystemDefault(null, "spark.dynamicAllocation.cachedExecutorIdleTimeout",
+                    "120s"), "Remove an executor which has cached data blocks")
+            .add("spark.dynamicAllocation.minExecutors",
+                getSystemDefault(null, "spark.dynamicAllocation.minExecutors", "0"),
+                "Lower bound for the number of executors if dynamic allocation is enabled. ")
+            .add("spark.dynamicAllocation.initialExecutors",
+                getSystemDefault(null, "spark.dynamicAllocation.initialExecutors", "1"),
+                "Initial number of executors to run if dynamic allocation is enabled. ")
+            .add("spark.dynamicAllocation.maxExecutors",
+                getSystemDefault(null, "spark.dynamicAllocation.maxExecutors", "10"),
+                "Upper bound for the number of executors if dynamic allocation is enabled. ")
             .add("zeppelin.spark.useHiveContext",
                 getSystemDefault("ZEPPELIN_SPARK_USEHIVECONTEXT",
                     "zeppelin.spark.useHiveContext", "true"),
@@ -127,15 +155,17 @@ public class SparkInterpreter extends Interpreter {
   private Map<String, Object> binder;
   private SparkVersion sparkVersion;
 
-
+  private SparkYarnClusterInterpreter yspark;
+  
   public SparkInterpreter(Properties property) {
     super(property);
+    yspark = new SparkYarnClusterInterpreter(property);
     out = new SparkOutputStream();
   }
 
   public SparkInterpreter(Properties property, SparkContext sc) {
     this(property);
-
+    yspark = new SparkYarnClusterInterpreter(property);
     this.sc = sc;
     env = SparkEnv.get();
     sparkListener = setupListeners(this.sc);
@@ -385,6 +415,10 @@ public class SparkInterpreter extends Interpreter {
 
   @Override
   public void open() {
+    if (getProperty("master").equals("yarn-cluster")){
+      yspark.open();
+      return;
+    }
     URL[] urls = getClassloaderUrls();
 
     // Very nice discussion about how scala compiler handle classpath
@@ -725,6 +759,8 @@ public class SparkInterpreter extends Interpreter {
    */
   @Override
   public InterpreterResult interpret(String line, InterpreterContext context) {
+    if (getProperty("master").equals("yarn-cluster"))
+      return yspark.interpret(line, context);
     if (sparkVersion.isUnsupportedVersion()) {
       return new InterpreterResult(Code.ERROR, "Spark " + sparkVersion.toString()
           + " is not supported");
@@ -812,11 +848,16 @@ public class SparkInterpreter extends Interpreter {
 
   @Override
   public void cancel(InterpreterContext context) {
-    sc.cancelJobGroup(getJobGroup(context));
+    if (getProperty("master").equals("yarn-cluster"))
+      yspark.cancel(context);
+    else
+      sc.cancelJobGroup(getJobGroup(context));
   }
 
   @Override
   public int getProgress(InterpreterContext context) {
+    if (getProperty("master").equals("yarn-cluster"))
+      return yspark.getProgress(context);
     String jobGroup = getJobGroup(context);
     int completedTasks = 0;
     int totalTasks = 0;
@@ -941,13 +982,15 @@ public class SparkInterpreter extends Interpreter {
   @Override
   public void close() {
     logger.info("Close interpreter");
-
-    if (numReferenceOfSparkContext.decrementAndGet() == 0) {
-      sc.stop();
-      sc = null;
+    if (getProperty("master").equals("yarn-cluster"))
+      yspark.close();
+    else {
+      if (numReferenceOfSparkContext.decrementAndGet() == 0) {
+        sc.stop();
+        sc = null;
+      }
+      intp.close();
     }
-
-    intp.close();
   }
 
   @Override

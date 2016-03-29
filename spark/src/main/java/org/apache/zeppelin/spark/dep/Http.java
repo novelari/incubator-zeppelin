@@ -7,7 +7,7 @@ import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
 
 /**
- * Some comments
+ * 
  * */
 public class Http {
 
@@ -25,17 +25,13 @@ public class Http {
     return null;
   }
 
-  /**
-   * Some comments
-   * */
+
   public static Response get(String url) {
     Future<Response> f = asyncHttpClient.prepareGet(url).execute();
     return getFromFuture(f);
   }
 
-  /**
-   * Some comments
-   * */
+
   public static Response post(String url, String jsonString) {
     final AsyncHttpClient.BoundRequestBuilder builder = asyncHttpClient.preparePost(url);
 

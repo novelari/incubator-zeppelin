@@ -1,12 +1,12 @@
 package org.apache.zeppelin.spark.dep;
 
 /**
- * some comments
+ * 
  *
  */
 public class Statement {
 
-  int id;
+  public int id;
   public String state;
   public StatementOutput output;
 
