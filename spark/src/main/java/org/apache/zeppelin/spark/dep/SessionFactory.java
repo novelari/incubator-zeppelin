@@ -1,8 +1,6 @@
-package org.apache.zeppelin.yspark;
+package org.apache.zeppelin.spark.dep;
 
-import static org.apache.zeppelin.yspark.Http.delete;
-import static org.apache.zeppelin.yspark.Http.get;
-import static org.apache.zeppelin.yspark.Http.post;
+import static org.apache.zeppelin.spark.dep.Http.*;
 
 import java.io.IOException;
 import java.util.HashMap;

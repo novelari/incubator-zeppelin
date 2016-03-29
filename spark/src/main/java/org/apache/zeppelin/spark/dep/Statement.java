@@ -1,4 +1,4 @@
-package org.apache.zeppelin.yspark;
+package org.apache.zeppelin.spark.dep;
 
 /**
  * some comments
@@ -7,8 +7,8 @@ package org.apache.zeppelin.yspark;
 public class Statement {
 
   int id;
-  String state;
-  StatementOutput output;
+  public String state;
+  public StatementOutput output;
 
   public Statement() {
   }

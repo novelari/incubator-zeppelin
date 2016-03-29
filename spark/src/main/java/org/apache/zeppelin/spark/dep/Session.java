@@ -1,8 +1,6 @@
-package org.apache.zeppelin.yspark;
+package org.apache.zeppelin.spark.dep;
 
-import static org.apache.zeppelin.yspark.Http.get;
-import static org.apache.zeppelin.yspark.Http.post;
-
+import static org.apache.zeppelin.spark.dep.Http.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
@@ -19,17 +17,17 @@ import com.ning.http.client.Response;
  */
 public class Session {
 
-  int id;
-  String name;
-  String state;
-  String kind;
-  String[] log;
-  String url;
-  String driverMemory;
-  String driverCores;
-  String executorMemory;
-  String executorCores;
-  String numExecutors;
+  public int id;
+  public String name;
+  public String state;
+  public String kind;
+  public String[] log;
+  public String url;
+  public String driverMemory;
+  public String driverCores;
+  public String executorMemory;
+  public String executorCores;
+  public String numExecutors;
   
 
   public Session() {

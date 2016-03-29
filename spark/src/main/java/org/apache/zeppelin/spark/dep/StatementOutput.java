@@ -1,4 +1,4 @@
-package org.apache.zeppelin.yspark;
+package org.apache.zeppelin.spark.dep;
 
 import java.util.HashMap;
 /**
@@ -7,11 +7,11 @@ import java.util.HashMap;
  */
 public class StatementOutput {
 
-  String status;
+  public String status;
   int executionCount;
   String ename;
-  String evalue;
-  HashMap<String, String> data;
+  public String evalue;
+  public HashMap<String, String> data;
 
   public StatementOutput() {
   }

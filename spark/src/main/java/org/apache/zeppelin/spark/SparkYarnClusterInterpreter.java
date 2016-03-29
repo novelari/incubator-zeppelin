@@ -15,19 +15,22 @@
  * limitations under the License.
  */
 
-package org.apache.zeppelin.yspark;
-
-import static org.apache.zeppelin.yspark.Http.get;
+package org.apache.zeppelin.spark;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
+
+import static org.apache.zeppelin.spark.dep.Http.*;
 
 import org.apache.zeppelin.interpreter.Interpreter;
 import org.apache.zeppelin.interpreter.InterpreterContext;
 import org.apache.zeppelin.interpreter.InterpreterPropertyBuilder;
 import org.apache.zeppelin.interpreter.InterpreterResult;
 import org.apache.zeppelin.interpreter.InterpreterResult.Code;
+import org.apache.zeppelin.spark.dep.Session;
+import org.apache.zeppelin.spark.dep.SessionFactory;
+import org.apache.zeppelin.spark.dep.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,12 +57,15 @@ public class SparkYarnClusterInterpreter extends Interpreter {
     Interpreter
         .register(
             "yspark",
-            "yspark",
+            "spark",
             SparkYarnClusterInterpreter.class.getName(),
             new InterpreterPropertyBuilder()
                 .add("spark.app.name",
                     getSystemDefault(null, "spark.app.name", "Zeppelin_yarn_cluster"),
                     "The name of spark application.")
+                .add("master",
+                    getSystemDefault(null, "spark.master", "yarn-cluster"),
+                    "Spark master to run in yarn-cluster mode")
                 .add("livy.server.host",
                     getSystemDefault(null, "livy.server.host", "localhost:8998"),
                     "The host of livy server.")
@@ -139,11 +145,16 @@ public class SparkYarnClusterInterpreter extends Interpreter {
   @Override
   public InterpreterResult interpret(String st, InterpreterContext context) {
 
-    // Check if livy server is running in that host
+    if (!getProperty("master").equals("yarn-cluster"))
+      return new InterpreterResult(Code.ERROR,
+                 "The master mode must be yarn-cluster not " + getProperty("master") + " .");
+// Check if livy server is running in that host
     if (!checkLivyServer()) {
       return new InterpreterResult(Code.ERROR,
           "Livy server isn't running on this host, please check that host.");
     }
+
+    
 
     if (session != null) {
       try {

@@ -1,4 +1,4 @@
-package org.apache.zeppelin.yspark;
+package org.apache.zeppelin.spark;
 
 import static org.junit.Assert.*;
 
@@ -32,6 +32,19 @@ public class SparkYarnClusterInterpreterTest {
     yspark.close();
   }
 
+  @Test
+  public void testYarnClusterMode() {
+    
+	Properties p = new Properties();
+    p.setProperty("livy.server.host", "http://master.kiwenlau.com:8998");
+    p.setProperty("master", "local[*]");
+    SparkYarnClusterInterpreter yspark1 = new SparkYarnClusterInterpreter(p);
+    yspark1.open();
+    InterpreterResult result = yspark1.interpret("val a=1", context);
+    assertEquals("The master mode must be yarn-cluster not local[*] .",
+        result.message());
+  }
+  
   @Test
   public void testServerShutdown() {
     Properties p = new Properties();

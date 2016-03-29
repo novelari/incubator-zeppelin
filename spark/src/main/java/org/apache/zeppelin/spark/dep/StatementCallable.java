@@ -1,4 +1,4 @@
-package org.apache.zeppelin.yspark;
+package org.apache.zeppelin.spark.dep;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
