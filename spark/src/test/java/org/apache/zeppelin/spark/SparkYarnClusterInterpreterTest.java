@@ -36,11 +36,12 @@ public class SparkYarnClusterInterpreterTest {
   @Test
   public void testServerShutdown() {
     Properties p = new Properties();
+    p.setProperty("livy.server.host", "http://localhost:8998");
     p.setProperty("master", "yarn-cluster");
     SparkInterpreter yspark1 = new SparkInterpreter(p);
     yspark1.open();
     InterpreterResult result = yspark1.interpret("val a=1", context);
-    assertEquals("Livy server isn't running on this host, please check that host.",
+    assertEquals("you need to have the livy server running in the master node of the cluster and set the property:  livy.server.host to <master-node-hostname-or-ip>:8998",
         result.message());
   }
 

@@ -29,19 +29,20 @@ public class Session {
   public String executorCores;
   public String numExecutors;
   
+  Gson gson = new Gson();
 
   public Session() {
   }
 
   public Statement createStatement(String st) throws IOException {
-    HashMap<String, String> command = new HashMap();
-    Gson gson = new Gson();
+    HashMap<String, String> command = new HashMap<String, String>();
+    
     command.put("code", st);
     String data = gson.toJson(command);
     Response r = post(this.url + "/statements", data);
     String json = r.getResponseBody();
     Statement statement = gson.fromJson(json, Statement.class);
-    Callable callableTask = new StatementCallable(this, statement);
+    Callable<Statement> callableTask = new StatementCallable(this, statement);
     ExecutorService executor = Executors.newFixedThreadPool(2);
     Future<Statement> future = executor.submit(callableTask);
     try {
@@ -57,7 +58,6 @@ public class Session {
   public Statement getStatement(Statement statement) throws IOException {
     Response r = get(this.url + "/statements/" + statement.id);
     String json = r.getResponseBody();
-    Gson gson = new Gson();
     statement = gson.fromJson(json, Statement.class);
     return statement;
   }

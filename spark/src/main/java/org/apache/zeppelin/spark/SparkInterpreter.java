@@ -155,7 +155,7 @@ public class SparkInterpreter extends Interpreter {
   private Map<String, Object> binder;
   private SparkVersion sparkVersion;
 
-  private SparkYarnClusterInterpreter yspark;
+  private final SparkYarnClusterInterpreter yspark;
   
   public SparkInterpreter(Properties property) {
     super(property);
@@ -165,10 +165,11 @@ public class SparkInterpreter extends Interpreter {
 
   public SparkInterpreter(Properties property, SparkContext sc) {
     this(property);
-    yspark = new SparkYarnClusterInterpreter(property);
-    this.sc = sc;
-    env = SparkEnv.get();
-    sparkListener = setupListeners(this.sc);
+    if (!getProperty("master").equals("yarn-cluster")){
+      this.sc = sc;
+      env = SparkEnv.get();
+      sparkListener = setupListeners(this.sc);
+    }
   }
 
   public SparkContext getSparkContext() {

@@ -61,62 +61,56 @@ public class SparkYarnClusterInterpreter extends Interpreter {
             SparkYarnClusterInterpreter.class.getName(),
             new InterpreterPropertyBuilder()
                 .add("spark.app.name",
-                    getSystemDefault(null, "spark.app.name", "Zeppelin_yarn_cluster"),
-                    "The name of spark application.")
+                    SparkInterpreter.getSystemDefault(null, "spark.app.name",
+                    "Zeppelin_yarn_cluster"), "The name of spark application.")
                 .add("master",
-                    getSystemDefault(null, "spark.master", "yarn-cluster"),
+                    SparkInterpreter.getSystemDefault(
+                    null, "spark.master", "yarn-cluster"),
                     "Spark master to run in yarn-cluster mode")
                 .add("livy.server.host",
-                    getSystemDefault(null, "livy.server.host", "localhost:8998"),
+                    SparkInterpreter.getSystemDefault(
+                    null, "livy.server.host", "localhost:8998"),
                     "The host of livy server.")
-                .add("spark.driver.cores", getSystemDefault(null, "spark.driver.cores", "1"),
+                .add("spark.driver.cores", SparkInterpreter.getSystemDefault(
+                    null, "spark.driver.cores", "1"),
                     "Driver cores. ex) 1, 2")
-                .add("spark.driver.memory", getSystemDefault(null, "spark.driver.memory", "512m"),
+                .add("spark.driver.memory", SparkInterpreter.getSystemDefault(
+                    null, "spark.driver.memory", "512m"),
                     "Driver memory. ex) 512m, 32g")
                 .add("spark.executor.instances",
-                    getSystemDefault(null, "spark.executor.instances", "3"),
+                    SparkInterpreter.getSystemDefault(null, "spark.executor.instances", "3"),
                     "Executor instances. ex) 1, 4")
-                .add("spark.executor.cores", getSystemDefault(null, "spark.executor.cores", "1"),
+                .add("spark.executor.cores", SparkInterpreter.getSystemDefault(
+                    null, "spark.executor.cores", "1"),
                     "Num cores per executor. ex) 1, 4")
                 .add("spark.executor.memory",
-                    getSystemDefault(null, "spark.executor.memory", "512m"),
+                     SparkInterpreter.getSystemDefault(
+                     null, "spark.executor.memory", "512m"),
                     "Executor memory per worker instance. ex) 512m, 32g")
                 .add("spark.dynamicAllocation.enabled",
-                    getSystemDefault(null, "spark.dynamicAllocation.enabled", "false"),
+                     SparkInterpreter.getSystemDefault(
+                     null, "spark.dynamicAllocation.enabled", "false"),
                     "Use dynamic resource allocation")
                 .add(
                     "spark.dynamicAllocation.cachedExecutorIdleTimeout",
-                    getSystemDefault(null, "spark.dynamicAllocation.cachedExecutorIdleTimeout",
-                        "120s"), "Remove an executor which has cached data blocks")
+                    SparkInterpreter.getSystemDefault(
+                    null, "spark.dynamicAllocation.cachedExecutorIdleTimeout",
+                    "120s"), "Remove an executor which has cached data blocks")
                 .add("spark.dynamicAllocation.minExecutors",
-                    getSystemDefault(null, "spark.dynamicAllocation.minExecutors", "0"),
+                     SparkInterpreter.getSystemDefault(
+                     null, "spark.dynamicAllocation.minExecutors", "0"),
                     "Lower bound for the number of executors if dynamic allocation is enabled. ")
                 .add("spark.dynamicAllocation.initialExecutors",
-                    getSystemDefault(null, "spark.dynamicAllocation.initialExecutors", "1"),
+                     SparkInterpreter.getSystemDefault(
+                     null, "spark.dynamicAllocation.initialExecutors", "1"),
                     "Initial number of executors to run if dynamic allocation is enabled. ")
                 .add("spark.dynamicAllocation.maxExecutors",
-                    getSystemDefault(null, "spark.dynamicAllocation.maxExecutors", "10"),
+                     SparkInterpreter.getSystemDefault(
+                     null, "spark.dynamicAllocation.maxExecutors", "10"),
                     "Upper bound for the number of executors if dynamic allocation is enabled. ")
                 .build());
   }
 
-  public static String getSystemDefault(String envName, String propertyName, String defaultValue) {
-
-    if (envName != null && !envName.isEmpty()) {
-      String envValue = System.getenv().get(envName);
-      if (envValue != null) {
-        return envValue;
-      }
-    }
-
-    if (propertyName != null && !propertyName.isEmpty()) {
-      String propValue = System.getProperty(propertyName);
-      if (propValue != null) {
-        return propValue;
-      }
-    }
-    return defaultValue;
-  }
 
   @Override
   public void open() {
@@ -137,7 +131,7 @@ public class SparkYarnClusterInterpreter extends Interpreter {
       }
       return false;
     } catch (Exception e) {
-     
+      logger.info("Interpreter exception", e);
       return false;
     }
   }
@@ -151,7 +145,8 @@ public class SparkYarnClusterInterpreter extends Interpreter {
 // Check if livy server is running in that host
     if (!checkLivyServer()) {
       return new InterpreterResult(Code.ERROR,
-          "Livy server isn't running on this host, please check that host.");
+          "you need to have the livy server running in the master node of the cluster " +
+            "and set the property:  livy.server.host to <master-node-hostname-or-ip>:8998");
     }
 
     
@@ -162,7 +157,8 @@ public class SparkYarnClusterInterpreter extends Interpreter {
       } catch (IOException e) {
         logger.info("Interpreter exception", e);
         return new InterpreterResult(Code.ERROR,
-            "Livy server isn't running on this host, please check that host.");
+            "you need to have the livy server running in the master node of the cluster " +
+            "and set the property:  livy.server.host to <master-node-hostname-or-ip>:8998");
       }
     }
     if (session == null) {
@@ -184,7 +180,8 @@ public class SparkYarnClusterInterpreter extends Interpreter {
       } catch (IOException e) {
         logger.info("Interpreter exception", e);
         return new InterpreterResult(Code.ERROR,
-            "Livy server isn't running on this host, please check that host.");
+            "you need to have the livy server running in the master node of the cluster " +
+            "and set the property:  livy.server.host to <master-node-hostname-or-ip>:8998");
       }
     }
     Statement statement = new Statement();

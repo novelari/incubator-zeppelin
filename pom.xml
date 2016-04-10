@@ -89,7 +89,6 @@
     <module>zeppelin-display</module>
     <module>spark-dependencies</module>
     <module>spark</module>
-    <module>spark-yarn-cluster</module>
     <module>markdown</module>
     <module>angular</module>
     <module>shell</module>

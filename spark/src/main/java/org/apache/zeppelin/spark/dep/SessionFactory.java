@@ -1,6 +1,8 @@
 package org.apache.zeppelin.spark.dep;
 
-import static org.apache.zeppelin.spark.dep.Http.*;
+import static org.apache.zeppelin.spark.dep.Http.delete;
+import static org.apache.zeppelin.spark.dep.Http.get;
+import static org.apache.zeppelin.spark.dep.Http.post;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -25,10 +27,9 @@ public class SessionFactory {
   }
 
   public static Session createSession(String host, Properties property) throws IOException {
-    HashMap<String, String> params = new HashMap();
-    HashMap<String, String> conf = new HashMap();
+    HashMap<String, String> conf = new HashMap<String, String>();
     Gson gson = new Gson();
-    params.put("kind", property.getProperty("livy.session.kind"));
+    
     String appName = property.getProperty("spark.app.name");
 
     conf.put("spark.driver.cores", property.getProperty("spark.driver.cores"));
@@ -63,13 +64,13 @@ public class SessionFactory {
     Session session = gson.fromJson(json, Session.class);
     session.url = host + "/sessions/" + session.id;
     
-    Callable callableTask = new SessionCallable(session);
+    Callable<Session> callableTask = new SessionCallable(session);
     ExecutorService executor = Executors.newFixedThreadPool(2);
     Future<Session> future = executor.submit(callableTask);
     
     int maxWaitTime = 180000;
     int curentWaitTime = 0;
-    
+    // Waiting 3 minutes for session creation otherwise kill
     while (!future.isDone()) {
       try {
         TimeUnit.MILLISECONDS.sleep(2000);
@@ -99,7 +100,7 @@ public class SessionFactory {
   public static Session getSession(Session session) throws IOException {
     String url = session.url;
     Response r = get(url);
-    if (r.getStatusCode() == 404) {
+    if (r.getStatusCode() >= 300) {
       return null;
     }
     String json = r.getResponseBody();
@@ -111,7 +112,7 @@ public class SessionFactory {
   }
 
   public static void deleteSession(Session session) {
-    Response r = delete(session.url);
+    delete(session.url);
 
   }
 
