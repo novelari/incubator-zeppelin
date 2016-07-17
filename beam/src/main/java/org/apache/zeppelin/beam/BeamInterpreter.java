@@ -1,7 +1,5 @@
 package org.apache.zeppelin.beam;
 
-import static javarepl.Result.result;
-import static javarepl.console.ConsoleConfig.consoleConfig;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -12,14 +10,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
-import javarepl.console.ConsoleConfig;
-import javarepl.console.SimpleConsole;
-import javarepl.console.commands.EvaluateFromHistory;
-import javarepl.console.commands.ListValues;
-import javarepl.console.commands.SearchHistory;
-import javarepl.console.commands.ShowHistory;
-import javarepl.console.rest.RestConsole;
-
+import org.apache.beam.examples.MinimalWordCount;
 import org.apache.zeppelin.interpreter.Interpreter;
 import org.apache.zeppelin.interpreter.InterpreterContext;
 import org.apache.zeppelin.interpreter.InterpreterPropertyBuilder;
@@ -32,7 +23,6 @@ import com.google.gson.Gson;
 */
 public class BeamInterpreter extends Interpreter {
 
-  private ReplServer replServer = null;
   private String host = "http://localhost:8001";
 
   public BeamInterpreter(Properties property) {
@@ -45,8 +35,11 @@ public class BeamInterpreter extends Interpreter {
   }
 
   public static void main(String[] args) {
-    InterpreterResult x = new BeamInterpreter(null).interpret(
-        "System.out.print(\"Hellgffgjo\");System.out.print(\"Hello\");", null);
+    String base = "src/main/java/org/apache/beam/examples";
+    String class1name = MinimalWordCount.class.getCanonicalName();
+    String class1Code = FileUtil.readUTF8(base + "/MinimalWordCount.java");
+    InterpreterResult x = new BeamInterpreter(null).interpret(class1Code, null);
+    System.out.println(x.message());
   }
 
   @Override
@@ -93,7 +86,7 @@ public class BeamInterpreter extends Interpreter {
   // }
   @Override
   public InterpreterResult interpret(String st, InterpreterContext context) {
-
+    // System.out.println(st);
     String uuid = "C" + UUID.randomUUID().toString().replace("-", "");
     // System.out.println(uuid);
     // StringWriter writer = new StringWriter();
@@ -121,14 +114,13 @@ public class BeamInterpreter extends Interpreter {
     try {
       // class1 = Compiler.compile(uuid, writer.toString());
       // Compiler.invokeMain(class1);
-      CompileSourceInMemory.execute(uuid, st);
+      String msg = CompileSourceInMemory.execute(uuid, st);
+      return new InterpreterResult(InterpreterResult.Code.SUCCESS, msg);
     } catch (Exception e) {
       e.printStackTrace();
       return new InterpreterResult(InterpreterResult.Code.ERROR, e.getMessage());
 
     }
-
-    return new InterpreterResult(InterpreterResult.Code.SUCCESS, "");
 
   }
 
