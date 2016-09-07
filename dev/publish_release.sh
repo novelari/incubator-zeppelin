@@ -30,12 +30,12 @@ if [[ $# -ne 2 ]]; then
   usage
 fi
 
-for var in GPG_PASSPHRASE ASF_USERID ASF_PASSWORD; do
-  if [[ -z "${!var}" ]]; then
-    echo "You need ${var} variable set"
-    exit 1
-  fi
-done
+#for var in GPG_PASSPHRASE ASF_USERID ASF_PASSWORD; do
+#  if [[ -z "${!var}" ]]; then
+#    echo "You need ${var} variable set"
+#    exit 1
+#  fi
+#done
 
 export MAVEN_OPTS="-Xmx2g -XX:MaxPermSize=512m"
 RED='\033[0;31m'
@@ -48,6 +48,16 @@ PUBLISH_PROFILES="-Pbuild-distr -Pspark-2.0 -Phadoop-2.4 -Pyarn -Ppyspark -Pspar
 PROJECT_OPTIONS="-pl !zeppelin-distribution"
 NEXUS_STAGING="https://repository.apache.org/service/local/staging"
 NEXUS_PROFILE="153446d1ac37c4"
+
+DOCKER_USERNAME="mahmoudelgamal"
+DOCKER_PASSWORD="38121398"
+DOCKER_EMAIL="mahmoudf.elgamal@gmail.com"
+
+function publish_to_dockerhub() {
+  # publish image
+  docker login --username="${DOCKER_USERNAME}" --password="${DOCKER_PASSWORD}" --email="${DOCKER_EMAIL}"
+  docker push ${DOCKER_USERNAME}/zeppelin-release:"${RELEASE_VERSION}"
+}
 
 function cleanup() {
   echo "Remove working directory and maven local repository"
@@ -152,6 +162,7 @@ function publish_to_maven() {
   echo "Once release candidate pass the vote, do not forget to hit the release button in https://repository.apache.org"
 }
 
-git_clone
-publish_to_maven
-cleanup
+#git_clone
+publish_to_dockerhub
+#publish_to_maven
+#cleanup

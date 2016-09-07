@@ -33,14 +33,24 @@ if [[ $# -ne 2 ]]; then
   usage
 fi
 
-if [[ -z "${GPG_PASSPHRASE}" ]]; then
-  echo "You need GPG_PASSPHRASE variable set"
-  exit 1
-fi
+#if [[ -z "${GPG_PASSPHRASE}" ]]; then
+#  echo "You need GPG_PASSPHRASE variable set"
+#  exit 1
+#fi
 
 RELEASE_VERSION="$1"
 GIT_TAG="$2"
 
+DOCKER_USERNAME="mahmoudelgamal"
+DOCKER_PASSWORD="38121398"
+DOCKER_EMAIL="mahmoudf.elgamal@gmail.com"
+
+function build_docker_image() {
+  echo "FROM ${DOCKER_USERNAME}/zeppelin-base:latest
+  RUN mkdir /usr/local/zeppelin/
+  ADD zeppelin-${RELEASE_VERSION}-bin-${BIN_RELEASE_NAME} /usr/local/zeppelin/" > "Dockerfile"
+  docker build -t ${DOCKER_USERNAME}/zeppelin-release:"${RELEASE_VERSION}" .
+}
 function make_source_package() {
   # create source package
   cd ${WORKING_DIR}
@@ -97,16 +107,20 @@ function make_binary_release() {
   mv "zeppelin-${RELEASE_VERSION}-bin-${BIN_RELEASE_NAME}.tgz.md5" "${WORKING_DIR}/"
   mv "zeppelin-${RELEASE_VERSION}-bin-${BIN_RELEASE_NAME}.tgz.sha512" "${WORKING_DIR}/"
 
+  if [[ $1 = "all" ]]; then
+    build_docker_image
+  fi
+  
   # clean up build dir
   rm -rf "${WORKING_DIR}/zeppelin-${RELEASE_VERSION}-bin-${BIN_RELEASE_NAME}"
 }
 
 git_clone
-make_source_package
+#make_source_package
 make_binary_release all "-Pspark-2.0 -Phadoop-2.4 -Pyarn -Ppyspark -Psparkr -Pr -Pscala-2.11"
 make_binary_release netinst "-Pspark-2.0 -Phadoop-2.4 -Pyarn -Ppyspark -Psparkr -Pr -Pscala-2.11 -pl !alluxio,!angular,!cassandra,!elasticsearch,!file,!flink,!hbase,!ignite,!jdbc,!kylin,!lens,!livy,!markdown,!postgresql,!python,!shell,!bigquery"
 
 # remove non release files and dirs
-rm -rf "${WORKING_DIR}/zeppelin"
-rm -rf "${WORKING_DIR}/zeppelin-${RELEASE_VERSION}"
+#rm -rf "${WORKING_DIR}/zeppelin"
+#rm -rf "${WORKING_DIR}/zeppelin-${RELEASE_VERSION}"
 echo "Release files are created under ${WORKING_DIR}"
